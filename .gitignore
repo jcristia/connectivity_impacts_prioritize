@@ -1,0 +1,34 @@
+# exclude all
+/*
+# except these files/folders
+!.gitignore
+!scripts/
+
+# then exclude specific folder and file types
+
+
+*.csv
+*.xlsx
+*.ini
+*.gdb
+*.mxd
+*.cpg
+*.dbf
+*.prj
+*.sbn
+*.sbx
+*.shp
+*.shp.xml
+*.xml
+*.shx
+*.png
+*.svg
+
+*.pyc
+
+*.nc
+*.npy
+*.log
+
+*.code-workspace
+*settings.json
