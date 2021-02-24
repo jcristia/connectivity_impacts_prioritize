@@ -5,7 +5,7 @@
 !scripts/
 
 # then exclude specific folder and file types
-
+*.gdb
 
 *.csv
 *.xlsx
