@@ -25,18 +25,25 @@ arcpy.Buffer_analysis('sg_101_retraced', 'sg_102_buff100', 100)
 
 # Copy
 # and then do a spatial select with watersheds to see which meadows are not
-# overlapping. Then, MANUALLY extend these to the coast. Create a bit of overlap
+# overlapping. Then, !!!MANUALLY!!! extend these to the coast. Create a bit of overlap
 # for a spatial select.
 arcpy.CopyFeatures_management('sg_102_buff100', 'sg_103_extend')
-# there were 6 features that overlapped, but I also edited 2 additional features
-# near Nanaimo (uid 569 and 568). There overlap with parts of watersheds was weird.
+# there were 6 features that overlapped, but I also edited additional features
+# near Nanaimo (uid 569, 568, 601, 603, 605). There overlap with parts of watersheds was weird.
+# I want them all to overlap the same watersheds.
 
 
 # Spatially select the watersheds that intersect with the seagrass meadows
 arcpy.MultipartToSinglepart_management(watersheds, 'watersheds_multisingle')
 watershed_sel = arcpy.SelectLayerByLocation_management('watersheds_multisingle', 'INTERSECT', 'sg_103_extend')
-arcpy.CopyFeatures_management(watershed_sel, 'watersheds_intersect')
+arcpy.CopyFeatures_management(watershed_sel, 'watersheds_01_intersect')
 arcpy.Delete_management('watersheds_multisingle')
+# there isn't a clear unique ID in the dataset. Add one.
+arcpy.AddField_management('watersheds_01_intersect', 'jc_ID', 'SHORT')
+with arcpy.da.UpdateCursor('watersheds_01_intersect', ['OBJECTID_1', 'jc_ID']) as cursor: # note that objectdid is actually 'OBJECTID_1'
+    for row in cursor:
+        row[1] = row[0]
+        cursor.updateRow(row)
 
 
 # Population
@@ -73,4 +80,35 @@ arcpy.FeatureToPolygon_management(
 
 arcpy.env.outputCoordinateSystem = arcpy.SpatialReference(3005)
 
-# so now do some spatial joins and shit and frequency...
+
+# spatial join
+arcpy.SpatialJoin_analysis(
+    'watersheds_01_intersect', 
+    'population_05_values', 
+    'watersheds_02_sjoin',
+    'JOIN_ONE_TO_MANY',
+    'KEEP_ALL',
+    match_option='INTERSECT')
+
+
+# frequency
+arcpy.Frequency_analysis('watersheds_02_sjoin', 'watersheds_03_frequency', ['jc_ID'], ['grid_code'])
+
+
+# spatial join, watersheds to seagrass
+arcpy.SpatialJoin_analysis(
+    'sg_103_extend',
+    'watersheds_01_intersect',
+    'sg_104_sjoin',
+    'JOIN_ONE_TO_MANY',
+    'KEEP_ALL',
+    match_option='INTERSECT'
+)
+
+# join frequency table to seagrass
+sg_joined_table = arcpy.AddJoin_management('sg_104_sjoin', 'jc_ID', 'watersheds_03_frequency', 'jc_ID')
+# frequency
+arcpy.Frequency_analysis(sg_joined_table, 'sg_105_freq', ['uID'], ['grid_code'])
+# this is the end product. From this I have the uID of the seagrass meadow,
+# the population of all the watersheds that touch that seagrass meadow
+# and there is also a frequency field that shows how many touch that meadow
