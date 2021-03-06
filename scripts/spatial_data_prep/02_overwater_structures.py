@@ -1,6 +1,8 @@
 # calculate area of overwater structures in 1km buffer for each seagrass meadow
 # Some !!!MANUAL!!! edits required. Review script before running again.
 
+# KML file is from the work that Katherine Bannar-Martin did for me
+
 import arcpy
 import os
 import pandas as pd
@@ -18,8 +20,8 @@ import openpyxl
 root = r'C:\Users\jcristia\Documents\GIS\MSc_Projects\Impacts\spatial'
 ow_gdb = 'overwater_structures.gdb'
 arcpy.env.workspace = os.path.join(root, ow_gdb)
-sg_og = os.path.join(root, 'shoreline_modification/shoreline_modification.gdb/sg_2_canada')
-land = os.path.join(root, 'shoreline_modification/shoreline_modification.gdb/coastline_bc_ak_wa_or_cleaned_less10000')
+sg_og = os.path.join(root, 'main_seagrass.gdb/sg_2_canada')
+land = os.path.join(root, 'main_seagrass.gdb/coastline_bc_ak_wa_or_cleaned_less10000')
 ow_kml = os.path.join(root, 'shoreline_modification/Katherine/EelgrassContract_BannarMartin/ow_structures_TOEDIT_BannarMartin.kmz')
 sheet = os.path.join(root, 'overwater_structures/Docks&Floathomes_BC_2017.xlsx')
 

@@ -8,7 +8,7 @@ import os
 root = r'C:\Users\jcristia\Documents\GIS\MSc_Projects\Impacts\spatial'
 outgdb = 'population.gdb'
 watersheds = r'C:\Users\jcristia\Documents\GIS\MSc_Projects\1Data_BASE\BASE\BASE_hydrology.gdb\WHSE_BASEMAPPING_FWA_ASSESSMENT_WATERSHEDS_POLY'
-sg = 'shoreline_modification/shoreline_modification.gdb/sg_101_retrace'
+sg = 'main_seagrass.gdb/sg_101_retrace'
 pop_rast = r'C:\Users\jcristia\Documents\GIS\MSc_Projects\1Data_BASE\Population\gpw-v4-population-count-rev11_2020_30_sec_tif\gpw_v4_population_count_rev11_2020_30_sec.tif'
 arcpy.env.workspace = os.path.join(root, outgdb)
 
