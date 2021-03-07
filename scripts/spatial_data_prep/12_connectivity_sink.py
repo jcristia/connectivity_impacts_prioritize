@@ -10,6 +10,8 @@
 # a significant challenge: dealing with the different coastline datasets I used
 # in the different chapters
 
+# For the sink metric, I will include particles that came from US MPAs. However,
+# for the source metric, I will only consider connections to Canadian coastline.
 
 import arcpy
 import os
@@ -151,6 +153,8 @@ for t in tbls:
 arcpy.Delete_management('coastline_mpa_buff30')
 arcpy.Delete_management('coastline_polytoline')
 arcpy.Delete_management('merge_coasts_sg')
-
+fcs = arcpy.ListFeatureClasses('sg_pld*')
+for fc in fcs:
+    arcpy.Delete_management(fc)
 
 # frequency table 'sink_particles' is the result to join to main seagrass dataset
