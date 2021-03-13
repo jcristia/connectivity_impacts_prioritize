@@ -7,11 +7,11 @@ import os
 
 root = r'C:\Users\jcristia\Documents\GIS\MSc_Projects\Impacts\spatial'
 outgdb = 'population.gdb'
-watersheds = r'C:\Users\jcristia\Documents\GIS\MSc_Projects\1Data_BASE\BASE\BASE_hydrology.gdb\WHSE_BASEMAPPING_FWA_ASSESSMENT_WATERSHEDS_POLY'
+watersheds = r'C:\Users\jcristia\Documents\GIS\MSc_Projects\1Data_BASE\BASE\BASE_hydrology.gdb\WHSE_BASEMAPPING_FWA_WATERSHEDS_POLY'
 sg = 'main_seagrass.gdb/sg_101_retrace'
+coastline = 'main_seagrass.gdb/coastline_bc_ak_wa_or_cleaned_less10000'
 pop_rast = r'C:\Users\jcristia\Documents\GIS\MSc_Projects\1Data_BASE\Population\gpw-v4-population-count-rev11_2020_30_sec_tif\gpw_v4_population_count_rev11_2020_30_sec.tif'
 arcpy.env.workspace = os.path.join(root, outgdb)
-
 
 # copy seagrass to population gdb
 # these are the polys that were retraced to align with the coastline
@@ -32,7 +32,6 @@ arcpy.CopyFeatures_management('sg_102_buff100', 'sg_103_extend')
 # near Nanaimo (uid 569, 568, 601, 603, 605). There overlap with parts of watersheds was weird.
 # I want them all to overlap the same watersheds.
 
-
 # Spatially select the watersheds that intersect with the seagrass meadows
 arcpy.MultipartToSinglepart_management(watersheds, 'watersheds_multisingle')
 watershed_sel = arcpy.SelectLayerByLocation_management('watersheds_multisingle', 'INTERSECT', 'sg_103_extend')
@@ -45,17 +44,7 @@ with arcpy.da.UpdateCursor('watersheds_01_intersect', ['OBJECTID_1', 'jc_ID']) a
         row[1] = row[0]
         cursor.updateRow(row)
 
-
-# Population
-# I can't figure out how to select raster cells if the polygons don't overlap the
-# cell centers. All the tools are set up this way and there isn't an option to
-# do anything different.
-# This isn't a big deal for bigger watersheds, but for islands and narrow areas,
-# there are many cells that are not selected.
-# You also cannot just turn the cells to polygons. Similar values get combined
-# and create larger polygons and there is no way to prevent this.
-# So... I may have to do this in a round about way.
-
+# clip raster to poly (this was created manually) 
 arcpy.CopyRaster_management(pop_rast, 'population_01')
 outRast = ExtractByMask('population_01', 'clip_rast_poly')
 outRast.save('population_02_clip')
@@ -81,34 +70,77 @@ arcpy.FeatureToPolygon_management(
 arcpy.env.outputCoordinateSystem = arcpy.SpatialReference(3005)
 
 
-# spatial join
-arcpy.SpatialJoin_analysis(
-    'watersheds_01_intersect', 
-    'population_05_values', 
-    'watersheds_02_sjoin',
-    'JOIN_ONE_TO_MANY',
-    'KEEP_ALL',
-    match_option='INTERSECT')
+# clip to coastline
+# This is important to do before I do an intersect and recalculate population
+# based on the new area. For cells that overlap the coastline and have a lot of
+# water in them, if I readjust based on this new area the I am reducing the pop
+# by too much. Think of it as a big 1km cell that is over a very small island
+# that has just a few people. If I clip to that island and then reduce the pop
+# by that new area then I will be getting a very small fraction of people present.
+arcpy.Clip_analysis(
+    'population_05_values',
+    os.path.join(root, coastline),
+    'population_06_clip')
+arcpy.MultipartToSinglepart_management('population_06_clip', 'population_07_multising')
 
+# project so that I can get areas in meters
+arcpy.Project_management('population_07_multising', 'population_08_project', 3005)
+# add area field so that this carries over to the next step
+arcpy.AddField_management('population_08_project', 'area_orig', 'DOUBLE')
+with arcpy.da.UpdateCursor('population_08_project', ['Shape_Area', 'area_orig']) as cursor:
+    for row in cursor:
+        row[1] = row[0]
+        cursor.updateRow(row)
 
-# frequency
-arcpy.Frequency_analysis('watersheds_02_sjoin', 'watersheds_03_frequency', ['jc_ID'], ['grid_code'])
+# intersect with watersheds
+arcpy.Intersect_analysis(
+    ['population_08_project', 'watersheds_01_intersect'], 
+    'population_09_intersect')
 
+# calc population per piece
+arcpy.AddField_management('population_09_intersect', 'pop_adjusted', 'DOUBLE')
+with arcpy.da.UpdateCursor('population_09_intersect', ['grid_code', 'area_orig', 'Shape_Area', 'pop_adjusted']) as cursor:
+    for row in cursor:
+        row[3] = row[0] * (row[2]/row[1])
+        cursor.updateRow(row)
+
+# This will assume that population is spread evenly throughout a raster cell.
+# This is not perfect for getting absolute amounts, but it should work
+# relatively betewen meadows.
+
+# dissolve by jc_ID and add pop_adjusted
+arcpy.Dissolve_management(
+    'population_09_intersect', 
+    'population_10_dissolve',
+    'jc_ID',
+    [['pop_adjusted', 'SUM']]
+    )
 
 # spatial join, watersheds to seagrass
 arcpy.SpatialJoin_analysis(
     'sg_103_extend',
-    'watersheds_01_intersect',
+    'population_10_dissolve',
     'sg_104_sjoin',
     'JOIN_ONE_TO_MANY',
     'KEEP_ALL',
     match_option='INTERSECT'
 )
 
-# join frequency table to seagrass
-sg_joined_table = arcpy.AddJoin_management('sg_104_sjoin', 'jc_ID', 'watersheds_03_frequency', 'jc_ID')
 # frequency
-arcpy.Frequency_analysis(sg_joined_table, 'sg_105_freq', ['uID'], ['grid_code'])
+arcpy.Frequency_analysis('sg_104_sjoin', 'sg_105_freq', ['uID'], ['SUM_pop_adjusted'])
+# change null to zero
+# there are 6 meadows that didn't overlap any land and therefore do not have values
+# this is because the land dataset I used had very small islands removed
+# all of these meadows except 1 overlap islands that do not have any structures
+# on them. The one that has a dock doesn't appear to have a house, but it might
+# be buried in the few trees. I'll ignore it.
+with arcpy.da.UpdateCursor('sg_105_freq', ['SUM_pop_adjusted']) as cursor:
+    for row in cursor:
+        if row[0] == None:
+            row[0] = 0
+        cursor.updateRow(row)
+
+
 # this is the end product. From this I have the uID of the seagrass meadow,
 # the population of all the watersheds that touch that seagrass meadow
 # and there is also a frequency field that shows how many touch that meadow
