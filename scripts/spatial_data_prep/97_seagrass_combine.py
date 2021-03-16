@@ -1,5 +1,6 @@
 # combine all impact and connectivity attributes into 1 seagrass dataset
-# I run this one to combine everything for the 
+# I run this one to combine everything for the regionally distributed impact
+# metric. Then script 99 does the final combine.
 
 import arcpy
 import os
@@ -24,7 +25,7 @@ population = 'population.gdb/sg_105_freq'
 # sg_07b_TYPECOUNT gives me the count of structure type in each buffer. This
 # might be useful for noting the extra effects from aquaculture and wood waste
 ow_area = 'overwater_structures.gdb/sg_07a_AREA'
-ow_type = 'overwater_structures.gdb/sg_07b_TYPECOUNT'
+#ow_type = 'overwater_structures.gdb/sg_07b_TYPECOUNT'
 shoreline_mod = 'shoreline_modification.gdb/sg_106_AREA'
 agriculture = 'agriculture_watershed.gdb/sg_105_freq'
 cutblocks = 'cutblocks_watershed.gdb/sg_105_freq'
@@ -47,7 +48,7 @@ gapfill_60 = 'connectivity_gapfill_results.gdb/sg_01_pld60_gaptotal'
 ds_dict = {
     population: ['SUM_pop_adjusted'],
     ow_area: ['ow_percent'],
-    ow_type: ['aquaculture', 'logboom'],
+    #ow_type: ['aquaculture', 'logboom'],
     shoreline_mod: ['shmod_percent'],
     agriculture: ['percent_cropland'],
     cutblocks: ['percent_cutblocks'],
@@ -66,8 +67,8 @@ ds_dict = {
 new_fields = [
     'popn',
     'ow_perc',
-    'aquacult',
-    'logboom',
+    #'aquacult',
+    #'logboom',
     'smodperc',
     'agricult',
     'cutblock',
