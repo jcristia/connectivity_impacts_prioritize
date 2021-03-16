@@ -1,5 +1,9 @@
 # identify meadows with European green crab presence
 
+# csv came from Brett Howard
+# There were a few errors and some rows had to be deleted. See her email and the
+# original csv for reference.
+
 import arcpy
 import os
 
