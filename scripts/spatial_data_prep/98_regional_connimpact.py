@@ -34,10 +34,11 @@ field_names = [i.name for i in arcpy.ListFields(impacts) if i.type != 'OID']
 cursor = arcpy.da.SearchCursor(impacts, field_names)
 df_imp = pd.DataFrame(data=[row for row in cursor], columns=field_names)
 df_imp = df_imp.drop(
-    ['Shape', 'area_clipmpa', 'percent_mpaoverlap', 'Shape_Length', 'Shape_Area',
-    'dPCpld01', 'dPCpld60', 'sink_01', 'sink_60', 'source01', 'source60',
-    'gpfill01', 'gpfill60']
+    ['Shape', 'area_clipmpa', 'percent_mpaoverlap', 'Shape_Length', 
+    'Shape_Area', 'dPCpld01', 'dPCpld60', 'sink_01', 'sink_60', 'source01', 
+    'source60', 'gpfill01', 'gpfill60']
     , axis=1)
+# note: I am removing counts of aquaculture and logbooms at this step
 
 # add up all impacts by meadow and normalize
 df_imp['total'] = df_imp.iloc[:, 1:].sum(axis=1)
@@ -45,7 +46,7 @@ min = df_imp.total.min()
 max = df_imp.total.max()
 df_imp['total_norm'] = (df_imp.total - min) / (max - min)
 df_imp = df_imp.drop(
-    ['popn', 'ow_perc', 'aquacult', 'logboom', 'smodperc', 'agricult', 'cutblock', 'gcrab', 'total'],
+    ['popn', 'ow_perc', 'smodperc', 'agricult', 'cutblock', 'gcrab', 'total'],
     axis=1
 )
 
@@ -53,7 +54,7 @@ df_imp = df_imp.drop(
 # for each meadow, calculate source/sink distributed impact
 uIDs = df_imp.uID.values
 s_dict = {
-    'uid':[],
+    'uID':[],
     'sink':[],
     'source':[]
     }
@@ -79,7 +80,7 @@ for uid in uIDs:
     source = imps_mult_out.impconn.sum()
 
     # add to dictionary
-    s_dict['uid'].append(uid)
+    s_dict['uID'].append(uid)
     s_dict['sink'].append(sink)
     s_dict['source'].append(source)
 
