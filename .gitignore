@@ -32,3 +32,5 @@
 
 *.code-workspace
 *settings.json
+
+*scripts/rank_prioritize/figs_out/
