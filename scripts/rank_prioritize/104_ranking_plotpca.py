@@ -260,3 +260,9 @@ fig.write_html('figs_out/pcaloadings_all.html')
 # our basic ranking will just end up choosing meadows based on high connectivity
 # values. Whereas with prioritizR, we can set a target for each conn metric and
 # then use the impacts separately as penalties.
+
+# Its good that most metrics don't align with each other, or else they would be redundant.
+# !!! Impacts are not redundant in their spatial distribution, so even though they 
+# could be redundant in their effects on seagrass/inverts/fish (e.g. cutblocks 
+# have the same resulting effect as shoreline mod), those effects would be 
+# spatially distributed.
