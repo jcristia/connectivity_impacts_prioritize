@@ -51,6 +51,39 @@
 # observations are better visible.
 
 
+
+##################################
+# FIRST, a simple test to understand the scaling and transforming
+# I was confused about how the scaling is actually done and why fit_transform
+# is done twice.
+import pandas as pd
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+df = pd.read_csv(r"C:\Users\jcristia\Documents\GIS\MSc_Projects\Impacts\scripts\rank_prioritize\test.csv")
+df
+x = StandardScaler().fit_transform(df)
+x = pd.DataFrame(x, columns=df.columns)
+x
+# as you can see, we scale each feature so that the mean is at 0
+# and then we use the standard deviation to compute the location of the values
+pcamodel = PCA(n_components=2)
+pca = pcamodel.fit_transform(x) 
+# I'm not sure but I think the fit transform here is related to the dimension reduction.
+# We are giving the empty pcamodel some data.
+# Notice how fit_transform is a method of both standardscaler and PCA. However,
+# in the documentation, it is just the pca that mentions that the transform is
+# related to dimensionality reduction. So maybe they are called the same thing
+# but they are doing something different.
+j = pd.DataFrame(pca)
+j # these are the coordinates in the new plane space for each point. Each row is a point.
+pcamodel.components_ # these are the loadings?
+pcamodel.components_.T
+####################################
+
+
+
+# and now the testing of the 3 methods described above:
+
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
@@ -307,3 +340,9 @@ fig.show()
 # this isn't because the values are large, it is because there is a lot of
 # variation in the values. As I recall, the dPC metrics spanned many orders of
 # magnitude.
+
+
+
+
+
+
