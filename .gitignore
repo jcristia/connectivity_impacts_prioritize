@@ -34,3 +34,8 @@
 *settings.json
 
 *scripts/rank_prioritize/figs_out/
+
+*.RData
+*.Rhistory
+*.Rproj
+*scripts/prioritizr_seagrass/.Rproj.user/
