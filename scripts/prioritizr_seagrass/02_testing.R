@@ -27,7 +27,7 @@ sg$locked_out <- as.logical(sg$locked_out)
 # test 1: with everything
 ########################################################
 
-out_folder <- 's1_test'
+out_folder <- 's01_test'
 out_dir <- file.path(out_path, out_folder)
 dir.create(out_dir)
 setwd(out_dir)
@@ -129,7 +129,7 @@ write.csv(df_summ, 'eval_summary.csv', row.names=FALSE)
 # test 2: no connectivity penalty
 ########################################################
 
-out_folder <- 's2_test'
+out_folder <- 's02_test'
 out_dir <- file.path(out_path, out_folder)
 dir.create(out_dir)
 setwd(out_dir)
