@@ -59,15 +59,16 @@ for row in df.itertuples(index=False):
 df_dict = pd.DataFrame(dict)
 df = pd.concat([df, df_dict])
 
-# Prioritizr doesn't actually use the uID I give it (it does retian it as a 
-# column though). So I need to add a sequential id.
-# Read uID list as df, order by uID, then add another id column and fill 
-# sequentially. Then for each from and to, change uID to this new id.
-df_uid = pd.DataFrame(uids, columns=['uid'])
-df_uid['new_id'] = df_uid.index + 1 # r is 1 index
-lkup = dict(zip(df_uid.uid, df_uid.new_id))
-df.id1 = df.id1.replace(lkup)
-df.id2 = df.id2.replace(lkup)
+## SO PRIORITIZR DOES actually recognize the uID value
+# # Prioritizr doesn't actually use the uID I give it (it does retian it as a 
+# # column though). So I need to add a sequential id.
+# # Read uID list as df, order by uID, then add another id column and fill 
+# # sequentially. Then for each from and to, change uID to this new id.
+# df_uid = pd.DataFrame(uids, columns=['uid'])
+# df_uid['new_id'] = df_uid.index + 1 # r is 1 index
+# lkup = dict(zip(df_uid.uid, df_uid.new_id))
+# df.id1 = df.id1.replace(lkup)
+# df.id2 = df.id2.replace(lkup)
 
 # Output to csv
 df.to_csv(os.path.join(out_dir, 'connectivity.csv'), index=False)
