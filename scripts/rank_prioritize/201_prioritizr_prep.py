@@ -12,11 +12,11 @@ sg = os.path.join(root, 'main_seagrass.gdb/sg_5_join_norm')
 # copy to prioritizr gdb
 arcpy.CopyFeatures_management(sg, 'sg_01_copy')
 
-# add area attribute and calculate
+# add area attribute and calculate in km2 (prioritizr doesn't like large numbers)
 arcpy.AddField_management('sg_01_copy', 'area', 'FLOAT')
 with arcpy.da.UpdateCursor('sg_01_copy', ['Shape_Area', 'area']) as cursor:
     for row in cursor:
-        row[1] = row[0]
+        row[1] = row[0] / 1000000.0
         cursor.updateRow(row)
 
 # convert to points
@@ -27,12 +27,12 @@ arcpy.AddFields_management(
     'sg_02_pt',
     [
         ['id', 'SHORT', 'id'],
-        ['cost1', 'LONG', 'cost1'],
+        ['cost1', 'DOUBLE', 'cost1'],
         ['cost2', 'LONG', 'cost2'],
         ['locked_in', 'TEXT', 'locked_in', 50],
         ['locked_out', 'TEXT', 'locked_out', 50],
         ['dummy_con', 'SHORT', 'dummy_con'],
-        ['area_scaled', 'FLOAT', 'area_scaled']
+        ['area_scaled', 'DOUBLE', 'area_scaled']
     ]
 )
 
