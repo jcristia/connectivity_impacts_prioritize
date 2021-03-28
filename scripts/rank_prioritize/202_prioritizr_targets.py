@@ -31,14 +31,14 @@ cursor = arcpy.da.SearchCursor(sg, field_names)
 df = pd.DataFrame(data=[row for row in cursor], columns=field_names)
 
 # AREA
-area_target_initial = 0.40
+area_target_initial = 0.30
 total_seagrass_area = df.area.sum()
 total_seagrass_protected = df.area_clipmpa.sum()
 precent_seagrass_protected = total_seagrass_protected / total_seagrass_area
 percent_to_protect = round(area_target_initial - precent_seagrass_protected, 2)
-# this ends up being ~ 16%
-# so when I lock out mpas, use 16%
-# when I run a scenario without any restrictions, use 40%
+# this ends up being ~ 6%
+# so when I lock out mpas, use 6%
+# when I run a scenario without any restrictions, use 30%
 
 
 # # ARCHIVING THIS FOR NOW:
