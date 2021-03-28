@@ -37,7 +37,8 @@ for dir in dirs:
     arcpy.da.NumPyArrayToTable(x, os.path.join(arcpy.env.workspace, 'sg_tbl_TEMP'))
     # join to copy of point feature class
     jointbl = arcpy.AddJoin_management('sg_02_pt', 'id', 'sg_tbl_TEMP', 'id')
-    sol_num = dir.split('_')[0]
+    #sol_num = dir.split('_')[0]
+    sol_num = dir
     arcpy.CopyFeatures_management(jointbl, f'sg_{sol_num}')
     arcpy.DeleteField_management(f'sg_{sol_num}', ['OBJECTID_1', 'id_1'])
     arcpy.Delete_management(jointbl)
