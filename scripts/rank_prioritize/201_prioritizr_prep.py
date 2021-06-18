@@ -67,7 +67,7 @@ with arcpy.da.UpdateCursor('sg_02_pt', fields) as cursor:
 # Therefore, determine a combination overlap/total area criteria to
 # exclude/include meadows.
 # Through some trial and error I concluded: overlap of 20% and meadows greater
-# than 500,000
+# than 0.5 km2
 fields = [
     'percent_mpaoverlap', 'area',
     'locked_in', 'locked_out',
@@ -80,7 +80,7 @@ with arcpy.da.UpdateCursor('sg_02_pt', fields) as cursor:
         else:
             row[2] = 'FALSE'
             row[3] = 'FALSE'
-        if row[0] < 20 and row[0] > 0 and row[1] > 500000:
+        if row[0] < 20 and row[0] > 0 and row[1] > 0.5:
             row[2] = 'FALSE'
             row[3] = 'FALSE'
         cursor.updateRow(row)

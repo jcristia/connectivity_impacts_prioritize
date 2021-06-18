@@ -128,7 +128,7 @@ evaluate_solution(p1, s1)
 # The conn target needs to be higher than the 0.06 target
 # since so much of the connectivity values are concentrated
 # in just a few meadows.
-# 0.3 is just a guess of where to start (2x 0.06). I will test
+# 0.12 is just a guess of where to start (2x 0.06). I will test
 # other targets in later solutions.
 # I'm still including the dummy_conn because I want the
 # solution  to select at least 6% of the meadows.
